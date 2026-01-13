@@ -1,37 +1,613 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Coldboot Engineering</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ColdBoot Engineering Ltd. — Embedded Systems Consultancy</title>
+  <meta name="description" content="Professional embedded systems consultancy: firmware, hardware, bring-up, debugging, performance, and productization." />
+
+  <style>
+    :root{
+      /* Dark foundation */
+      --bg-900:#0b0f14;
+      --bg-850:#0f1620;
+      --bg-800:#141d28;
+      --line:#223043;
+
+      /* Light section */
+      --paper:#eef2f7;
+      --paper-2:#f6f8fb;
+      --paper-line:#d7dde7;
+
+      /* Text */
+      --text:#e7edf6;
+      --muted:#a9b6c7;
+      --text-dark:#101828;
+      --muted-dark:#4b5565;
+
+      /* Accent (subtle, not “hacker”) */
+      --accent:#6aa9ff;
+      --accent-2:#9cc4ff;
+
+      /* UI */
+      --shadow: 0 12px 28px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+
+      --max: 1100px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      line-height:1.55;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 60% -10%, rgba(106,169,255,.20), transparent 55%),
+                  radial-gradient(900px 500px at 15% 10%, rgba(255,255,255,.06), transparent 50%),
+                  linear-gradient(180deg, var(--bg-900), var(--bg-850) 40%, var(--bg-900));
+    }
+
+    a{ color:inherit; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+    img{ max-width:100%; display:block; }
+
+    .container{
+      width:min(var(--max), calc(100% - 48px));
+      margin:0 auto;
+    }
+
+    /* Header */
+    header{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(11,15,20,.68);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .nav{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+      padding:14px 0;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      min-width: 240px;
+    }
+    .brand img{
+      height:38px;
+      width:auto;
+      /* helps pixel logo feel crisp */
+      image-rendering: pixelated;
+    }
+    .navlinks{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .navlinks a{
+      color:var(--muted);
+      font-weight:600;
+      font-size:14px;
+      padding:8px 10px;
+      border-radius:10px;
+    }
+    .navlinks a:hover{
+      color:var(--text);
+      background: rgba(255,255,255,.06);
+      text-decoration:none;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:700;
+      font-size:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      box-shadow: 0 6px 18px rgba(0,0,0,.18);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{
+      text-decoration:none;
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.10);
+      border-color: rgba(156,196,255,.35);
+    }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(106,169,255,.25), rgba(106,169,255,.12));
+      border-color: rgba(106,169,255,.45);
+    }
+
+    /* Hero */
+    .hero{
+      padding: 70px 0 52px;
+    }
+    .heroGrid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 34px;
+      align-items:center;
+    }
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      color: var(--accent-2);
+      font-weight:700;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      font-size:12px;
+      background: rgba(106,169,255,.10);
+      border: 1px solid rgba(106,169,255,.20);
+      padding: 6px 10px;
+      border-radius: 999px;
+      width: fit-content;
+    }
+    h1{
+      margin: 14px 0 10px;
+      font-size: clamp(34px, 4.2vw, 48px);
+      line-height:1.1;
+      letter-spacing:-.02em;
+    }
+    .subhead{
+      margin:0 0 18px;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 62ch;
+    }
+    .ctaRow{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .heroCard{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .heroCard h3{
+      margin: 0 0 6px;
+      font-size:16px;
+    }
+    .heroCard p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .heroCard ul{
+      margin: 12px 0 0;
+      padding: 0 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .heroCard li{ margin: 6px 0; }
+
+    /* Light “Services” section */
+    .sectionLight{
+      margin-top: 30px;
+      background: linear-gradient(180deg, var(--paper), var(--paper-2));
+      color: var(--text-dark);
+      border-top: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(0,0,0,.10);
+    }
+    .sectionLight .container{
+      padding: 56px 0;
+    }
+    .sectionTitle{
+      margin: 0 0 10px;
+      font-size: 28px;
+      letter-spacing: -.01em;
+    }
+    .sectionLead{
+      margin: 0 0 26px;
+      color: var(--muted-dark);
+      max-width: 70ch;
+    }
+    .cards{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .card{
+      background: rgba(255,255,255,.85);
+      border: 1px solid var(--paper-line);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(16,24,40,.10);
+    }
+    .card h3{
+      margin: 10px 0 6px;
+      font-size: 16px;
+      letter-spacing: -.01em;
+    }
+    .card p{
+      margin:0;
+      color: var(--muted-dark);
+      font-size: 14px;
+    }
+    .icon{
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      border: 1px solid rgba(106,169,255,.35);
+      background: rgba(106,169,255,.14);
+      color: #1d4ed8;
+      font-weight: 900;
+    }
+    .twoCol{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      margin-top: 28px;
+      align-items: start;
+    }
+    .callout{
+      background: rgba(255,255,255,.82);
+      border: 1px solid var(--paper-line);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .callout h3{ margin: 0 0 8px; font-size: 16px; }
+    .callout p{ margin:0; color: var(--muted-dark); font-size: 14px; }
+
+    /* Dark value props band */
+    .band{
+      background: linear-gradient(180deg, rgba(20,29,40,.55), rgba(11,15,20,.92));
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .band .container{
+      padding: 52px 0;
+    }
+    .bandGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+    .about{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .about h2{ margin: 0 0 10px; font-size: 22px; }
+    .about p{ margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+    .about .btn{ margin-top: 4px; }
+
+    .pillRow{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .pill{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .pill strong{
+      display:block;
+      margin-bottom:4px;
+      font-size: 14px;
+    }
+    .pill span{
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Contact */
+    .contact{
+      padding: 56px 0 64px;
+    }
+    .contactGrid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 22px;
+      align-items:start;
+    }
+    .form{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    label{
+      display:block;
+      font-weight:700;
+      font-size: 13px;
+      margin: 12px 0 6px;
+      color: var(--text);
+    }
+    input, textarea{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(11,15,20,.55);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{ min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus{
+      border-color: rgba(106,169,255,.55);
+      box-shadow: 0 0 0 3px rgba(106,169,255,.14);
+    }
+    .hint{
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .smallCard{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .smallCard h3{ margin:0 0 8px; font-size: 16px; }
+    .smallCard p{ margin:0; color: var(--muted); font-size: 14px; }
+    .smallCard .kv{
+      margin-top: 12px;
+      display:grid;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .smallCard .kv b{ color: var(--text); font-weight:700; }
+
+    footer{
+      border-top:1px solid rgba(255,255,255,.06);
+      padding: 18px 0 26px;
+      color: var(--muted);
+      font-size: 13px;
+      background: rgba(0,0,0,.12);
+    }
+    .footRow{
+      display:flex;
+      justify-content:space-between;
+      gap: 16px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    /* Responsive */
+    @media (max-width: 920px){
+      .heroGrid{ grid-template-columns: 1fr; }
+      .cards{ grid-template-columns: 1fr; }
+      .twoCol{ grid-template-columns: 1fr; }
+      .bandGrid{ grid-template-columns: 1fr; }
+      .pillRow{ grid-template-columns: 1fr; }
+      .contactGrid{ grid-template-columns: 1fr; }
+      .brand{ min-width: unset; }
+    }
+  </style>
 </head>
+
 <body>
+  <header>
+    <div class="container">
+      <div class="nav">
+        <a class="brand" href="#top" aria-label="Home">
+          <!-- Put your logo file next to this HTML and update src -->
+          <img src="logo.png" alt="ColdBoot Engineering Ltd." />
+        </a>
 
-    <h1>Coldboot Engineering</h1>
-    <p><strong>Embedded systems, firmware, and Linux development</strong></p>
+        <nav class="navlinks" aria-label="Primary navigation">
+          <a href="#about">About</a>
+          <a href="#services">Services</a>
+          <a href="#contact">Contact</a>
+          <a class="btn primary" href="#contact">Get a Quote</a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-    <p>
-        Embedded systems engineering support across low-level firmware,
-        RTOS-based systems, and Embedded Linux. Work typically focuses on
-        system bring-up, driver development, performance-critical code,
-        and debugging at the hardware–software boundary.
-    </p>
+  <main id="top">
+    <section class="hero">
+      <div class="container">
+        <div class="heroGrid">
+          <div>
+            <div class="kicker">Embedded Systems Consultancy</div>
+            <h1>Reliable firmware, hardware bring-up, and systems engineering — delivered professionally.</h1>
+            <p class="subhead">
+              ColdBoot Engineering Ltd. helps teams ship robust embedded products: from early architecture and
+              prototyping through debug, performance tuning, and production support.
+            </p>
+            <div class="ctaRow">
+              <a class="btn primary" href="#contact">Get in Touch</a>
+              <a class="btn" href="#services">View Services</a>
+            </div>
+            <p class="hint" style="margin-top:14px;">
+              Practical, documented engineering. No theatrics — just results.
+            </p>
+          </div>
 
-    <h2>Areas of focus</h2>
-    <ul>
-        <li>Embedded firmware and RTOS development</li>
-        <li>Embedded Linux and device driver bring-up</li>
-        <li>Hardware–software integration and fault isolation</li>
-        <li>Performance-critical and real-time systems</li>
-        <li>Secure boot and platform trust concepts</li>
-    </ul>
+          <aside class="heroCard" aria-label="Highlights">
+            <h3>What you can expect</h3>
+            <p>Clear comms, traceable decisions, and engineering that stands up in review.</p>
+            <ul>
+              <li>Bring-up & debugging (MCU/SoC, drivers, peripherals)</li>
+              <li>Performance, reliability, and power optimisation</li>
+              <li>Architecture, requirements, and delivery planning</li>
+              <li>Support across prototype → production</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </section>
 
-    <h2>Contact</h2>
-    <p>
-        Email: <a href="mailto:stuart@coldboot.dev">stuart@coldboot.dev</a><br>
-        UK · Remote / Hybrid
-    </p>
+    <section id="services" class="sectionLight">
+      <div class="container">
+        <h2 class="sectionTitle">Services</h2>
+        <p class="sectionLead">
+          Focused expertise for embedded teams that need additional capacity or specialist support at critical points
+          in the lifecycle.
+        </p>
 
+        <div class="cards" role="list">
+          <div class="card" role="listitem">
+            <div class="icon" aria-hidden="true">HW</div>
+            <h3>Embedded Systems Design</h3>
+            <p>
+              Hardware/firmware co-design, interfaces, constraints, and trade-offs. Sensible choices that reduce risk.
+            </p>
+          </div>
+
+          <div class="card" role="listitem">
+            <div class="icon" aria-hidden="true">FW</div>
+            <h3>Firmware Development</h3>
+            <p>
+              Production-quality firmware for MCUs and embedded Linux. Clean, testable code with maintainable structure.
+            </p>
+          </div>
+
+          <div class="card" role="listitem">
+            <div class="icon" aria-hidden="true">DBG</div>
+            <h3>Optimisation & Debugging</h3>
+            <p>
+              Fault isolation, timing issues, power/performance tuning, and hard-to-reproduce failures — methodically.
+            </p>
+          </div>
+        </div>
+
+        <div class="twoCol">
+          <div class="callout">
+            <h3>Typical engagements</h3>
+            <p>
+              Short, high-impact support (days–weeks) for bring-up and tough bugs, or longer engagements (months)
+              for architecture, feature delivery, and production hardening.
+            </p>
+          </div>
+
+          <div class="callout">
+            <h3>Industries</h3>
+            <p>
+              Industrial, instrumentation, security-adjacent products, bespoke devices, and engineering teams with
+              constrained time-to-market.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="band">
+      <div class="container">
+        <div class="bandGrid">
+          <div class="about">
+            <h2>About ColdBoot</h2>
+            <p>
+              ColdBoot Engineering Ltd. is an embedded consultancy focused on shipping dependable systems.
+              The emphasis is on correctness, traceability, and pragmatic delivery.
+            </p>
+            <p>
+              If you need a calm pair of hands for architecture decisions, firmware delivery, or the kind of debugging
+              that eats teams alive — this is the work we do.
+            </p>
+            <a class="btn" href="#contact">Contact Us</a>
+          </div>
+
+          <div class="pillRow" aria-label="Value propositions">
+            <div class="pill">
+              <strong>Deep expertise</strong>
+              <span>Firmware, electronics, and system-level thinking.</span>
+            </div>
+            <div class="pill">
+              <strong>Engineering-first</strong>
+              <span>Documentation, test strategy, and reviewable decisions.</span>
+            </div>
+            <div class="pill">
+              <strong>Client-focused</strong>
+              <span>Clear scope, predictable delivery, no drama.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="contact">
+      <div class="container">
+        <h2 class="sectionTitle">Get in touch</h2>
+        <p class="sectionLead" style="color: var(--muted);">
+          Share a short description of your project and current pain points. You’ll get a clear response on fit, next
+          steps, and likely effort.
+        </p>
+
+        <div class="contactGrid">
+          <!-- Static form: wire this up to your mail provider or a form endpoint later -->
+          <form class="form" action="#" method="post">
+            <label for="name">Name</label>
+            <input id="name" name="name" autocomplete="name" placeholder="Your name" />
+
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" />
+
+            <label for="msg">What do you need help with?</label>
+            <textarea id="msg" name="message" placeholder="A few sentences is plenty: platform, timeline, and what’s stuck."></textarea>
+
+            <div style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap;">
+              <button class="btn primary" type="submit">Send message</button>
+              <a class="btn" href="mailto:hello@coldboot.example">Email directly</a>
+            </div>
+
+            <p class="hint">
+              This is a static template: set the mailto above to your real address, or replace the form action with your form handler.
+            </p>
+          </form>
+
+          <aside class="smallCard">
+            <h3>Quick details</h3>
+            <p>Based in the UK. Remote-friendly. Limited on-site by arrangement.</p>
+
+            <div class="kv">
+              <div><b>Typical response:</b> 1–2 business days</div>
+              <div><b>Engagement types:</b> Debugging sprints, delivery support, architecture review</div>
+              <div><b>Documentation:</b> Notes, diagrams, and handover included</div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <a class="btn" href="#services">See services</a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footRow">
+        <div>© <span id="year"></span> ColdBoot Engineering Ltd.</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <a href="#top">Back to top</a>
+          <span aria-hidden="true">•</span>
+          <a href="#contact">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // tiny progressive enhancement
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
 
